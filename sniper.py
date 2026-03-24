@@ -61,3 +61,35 @@ async def fetch_and_route_to_mirofish(symbol="BTC"):
     )
     
     return response.json()
+
+def execute_kalshi_trade(report, symbol="BTC"):
+    """
+    Step 7: Kalshi Execution Adapter.
+    Extracts confidence and direction from the report and posts to Kalshi.
+    """
+    confidence = report.get("confidence", 0)
+    if confidence <= 70:
+        return None
+        
+    direction = report.get("market_direction", "yes")
+    
+    # Define payload based on symbol and mode
+    payload = {
+        "ticker": f"{symbol.upper()}-24H", 
+        "side": direction, 
+        "count": 5 if DEMO_MODE else 1
+    }
+    
+    # Set headers with authentication
+    headers = {"Authorization": f"Bearer {os.getenv('KALSHI_TOKEN')}"}
+    
+    # Execute the trade
+    order_response = requests.post(f"{KALSHI_BASE}/portfolio/orders", json=payload, headers=headers)
+    order = order_response.json()
+    
+    # Return unity schema with filled order details 
+    return {
+        "order_id": order.get("order_id"),
+        "status": order.get("status"),
+        "filled_details": order
+    }

@@ -28,6 +28,6 @@ pip install -r requirements.txt
 
 ### 3. Run the Sniper
 ```bash
-python main_pipeline.py
+streamlit run sniper.py
 ```
 
