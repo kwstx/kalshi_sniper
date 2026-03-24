@@ -121,7 +121,7 @@ st.divider()
 if st.button("START SNIPER", type="primary", use_container_width=True):
     st.session_state.is_running = True
     st.session_state.cycle = asyncio.run(run_sniper_cycle(st.session_state.symbol))
-    st.experimental_rerun()
+    st.rerun()
 
 if st.session_state.is_running:
     # Setup data from latest cycle
@@ -162,4 +162,4 @@ if st.session_state.is_running:
 
     time.sleep(30)
     st.session_state.cycle = asyncio.run(run_sniper_cycle(st.session_state.symbol))
-    st.experimental_rerun()
+    st.rerun()
