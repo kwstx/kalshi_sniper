@@ -93,3 +93,41 @@ def execute_kalshi_trade(report, symbol="BTC"):
         "status": order.get("status"),
         "filled_details": order
     }
+
+async def run_sniper_cycle(symbol="BTC"):
+    """
+    Step 8: Core Sniper Cycle.
+    Full flow from X data to MiroFish swarm to Kalshi bet executes in one function with clear logging.
+    """
+    st.info(f"🔄 Starting Sniper Cycle for target: {symbol}")
+    
+    # 1. Fetch signal and swarm report
+    report = await fetch_and_route_to_mirofish(symbol)
+    st.write("📊 **Generated MiroFish Swarm Report:**", report)
+    
+    # 2. Map report to execution on Kalshi
+    order = execute_kalshi_trade(report, symbol)
+    
+    if order:
+        st.success(f"🔥 Sniper Execution Successful! Order ID: {order['order_id']}")
+    else:
+        st.warning("⚠️ Execution skipped: Swarm confidence below threshold.")
+        
+    return {
+        "report": report, 
+        "order": order, 
+        "timestamp": datetime.now()
+    }
+
+# --- Dashboard Interaction ---
+st.divider()
+st.subheader("Sniper Controls")
+target_symbol = st.text_input("Asset Ticker (Binance Format)", value="BTC")
+
+if st.button("🏹 Fire Sniper Cycle"):
+    try:
+        # Streamlit runs synchronous code, wrap the async cycle
+        results = asyncio.run(run_sniper_cycle(target_symbol))
+        st.json(results)
+    except Exception as e:
+        st.error(f"Execution Error: {str(e)}")
